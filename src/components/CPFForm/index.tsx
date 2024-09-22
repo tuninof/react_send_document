@@ -1,5 +1,10 @@
 import React, { useState } from 'react';
 import { verifyCPF, confirmUser, savePhone } from '../../services/apiService'; // Importa as funções do serviço
+import ConfirmButtons from '../ConfirmButtons';
+import styles from './styles.module.css'
+import logoCoopfam from '../../assets/LogoCoopfamC.png'
+import Footer from '../Footer';
+
 
 const CPFForm: React.FC = () => {
     const [cpf, setCpf] = useState('');
@@ -108,63 +113,78 @@ const CPFForm: React.FC = () => {
                 <>
                     {!name && (
                         <div>
-                            <div>
-                                <p>Olá, seja bem-vindo!</p>
+                            <div className={styles.texto}>
+                                <img className={styles.logo} src={logoCoopfam} />
+                                <p>Olá, seja bem-vindo a nossa plataforma digital!</p>
                                 <p>Por favor, digite seu CPF.</p>
                             </div>
                             <form onSubmit={handleSubmit}>
-                                <input
-                                    type="text"
-                                    name='cpf'
-                                    value={cpf}
-                                    onChange={(e) => setCpf(e.target.value)}
-                                    placeholder="Digite o CPF"
-                                    required
-                                />
-                                <button type="submit" disabled={loading}>Verificar CPF</button>
+                                <div className={styles.formContainer}>
+                                    <input
+                                        type="text"
+                                        name='cpf'
+                                        value={cpf}
+                                        onChange={(e) => setCpf(e.target.value)}
+                                        placeholder="Digite o CPF"
+                                        required
+                                    />
+                                    <button type="submit" disabled={loading}>Verificar CPF</button>
+                                </div>
                             </form>
                         </div>
                     )}
                     {name && !confirmed && (
                         <div>
-                            <div>
+                            <div className={styles.texto}>
                                 <p>O nome é {name}. Este é você?</p>
                             </div>
-                            <button onClick={() => setConfirmed(true)}>Sim</button>
-                            <button onClick={handleReset}>Não</button>
+                            <ConfirmButtons onConfirm={() => setConfirmed(true)} onReset={handleReset} />
                         </div>
                     )}
                     {confirmed && !downloadsCompleted && (
-                        <button onClick={handleConfirm}>Baixar PDF</button>
+                        <div>
+                            <div className={styles.texto}>
+                                <p>Você receberá no seu dispositivo:</p>
+                                <p>A lista de produtos permitidos pelo Fair Trade e</p>
+                                <p>A lista vermelha de produtos proíbidos pelo Fair Trade</p>
+                                <p>Clique no botão abaixo para baixar o PDF.</p>
+                            </div>
+                            <button className={styles.buttonDowloading} onClick={handleConfirm}>Baixar PDF</button>
+                        </div>
                     )}
                     {downloadsCompleted && (
                         <div>
-                            <div>
+                            <div className={styles.texto}>
                                 <p>Os arquivos foram baixados com sucesso e já se encontram na pasta de download do seu dispositivo.</p>
                                 <p>Em breve, os arquivos também serão enviados pelo WhatsApp.</p>
                                 <p>Por favor, digite o número do seu telefone no campo abaixo.</p>
                             </div>
                             <form onSubmit={(e) => { e.preventDefault(); handlePhoneSubmit(); }}>
-                                <input
-                                    type="text"
-                                    name="phone"
-                                    value={phone}
-                                    onChange={handlePhoneChange}
-                                    placeholder="Digite seu número de telefone"
-                                    required
-                                />
-                                <button type="submit">Enviar número</button>
+                                <div className={styles.formContainer}>
+                                    <input
+                                        type="text"
+                                        name="phone"
+                                        value={phone}
+                                        onChange={handlePhoneChange}
+                                        placeholder="Digite seu número de telefone"
+                                        required
+                                    />
+                                    <button type="submit">Enviar número</button>
+                                </div>
                             </form>
                         </div>
                     )}
                 </>
             ) : (
-                <div>
+                <div className={styles.texto}>
                     <p>Sua participação foi concluída com sucesso!</p>
-                    <p>Suas listas já estão disponíveis na pasta de downloads do seu dispositivo,</p>
-                    <p>em breve as listas serão encaminhadas também para seu WhatsApp.</p>
                     <p>Obrigado por utilizar nossos serviços!</p>
+                    <div>
+                    <Footer />
+                    </div>
                 </div>
+
+
             )}
         </div>
     );

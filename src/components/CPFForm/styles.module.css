@@ -1,0 +1,51 @@
+.formContainer {
+   display: flex;
+   justify-content: center;
+   gap: 20px;
+   margin-top: 60px;
+}
+
+.logo {
+    max-width: 200px;
+}
+
+.formContainer input {
+    background-color: transparent;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ffffff;
+}
+
+.formContainer button{
+    color: #000;
+    background-color: #f5c518;
+    border: 2px solid #f5c518 ;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+.formContainer button:hover {
+    color: #f5c518;
+    background-color: transparent;
+}
+
+.buttonDowloading {
+    color: #000;
+    background-color: #f5c518;
+    border: 2px solid #f5c518 ;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-weight: bold;
+
+}
+
+.buttonDowloading:hover {
+    color: #f5c518;
+    background-color: transparent;
+}
+
+.texto p{
+    font-size: 20pt;
+}
+
