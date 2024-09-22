@@ -14,6 +14,33 @@ const CPFForm: React.FC = () => {
     const [downloadsCompleted, setDownloadsCompleted] = useState(false);
     const [phone, setPhone] = useState('');
     const [phoneSubmitted, setPhoneSubmitted] = useState(false);
+    const [message, setMessage] = useState('');
+    const [messageType, setMessageType] = useState('');
+
+    const showMessage = (msg: string, type: 'success' | 'error') => {
+        setMessage(msg);
+        setMessageType(type);
+        setTimeout(() => {
+            setMessage('');
+        }, 5000); // A mensagem desaparecerá após 5 segundos
+    };
+
+    //atualização
+    const removeCpfFormatting = (cpf: string) => cpf.replace(/\D/g, '');
+
+    // Formata o CPF para exibição
+    const formatCpf = (value: string) => {
+        const cpfNumbers = value.replace(/\D/g, ''); // Remove caracteres não numéricos
+        if (cpfNumbers.length <= 3) return cpfNumbers;
+        if (cpfNumbers.length <= 6) return `${cpfNumbers.slice(0, 3)}.${cpfNumbers.slice(3)}`;
+        if (cpfNumbers.length <= 9) return `${cpfNumbers.slice(0, 3)}.${cpfNumbers.slice(3, 6)}.${cpfNumbers.slice(6)}`;
+        return `${cpfNumbers.slice(0, 3)}.${cpfNumbers.slice(3, 6)}.${cpfNumbers.slice(6, 9)}-${cpfNumbers.slice(9, 11)}`;
+    };
+
+    const handleCpfChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const formattedCpf = formatCpf(e.target.value);
+        setCpf(formattedCpf);
+    };
 
     const formatPhone = (value: string) => {
         // Remove todos os caracteres não numéricos
@@ -36,8 +63,9 @@ const CPFForm: React.FC = () => {
     };
 
     const validateCPF = (cpf: string) => {
-        const cpfPattern = /^\d{11}$/; // Verifica se o CPF tem 11 dígitos
-        return cpfPattern.test(cpf);
+        const cleanedCpf = removeCpfFormatting(cpf); // Remove a formatação antes de validar
+        const cpfPattern = /^\d{11}$/;
+        return cpfPattern.test(cleanedCpf);
     };
 
     const validatePhone = (phone: string) => {
@@ -45,27 +73,36 @@ const CPFForm: React.FC = () => {
         return phonePattern.test(phone);
     };
 
+   
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!validateCPF(cpf)) {
-            alert('Por favor, digite um CPF válido com 11 dígitos.');
+        const cleanedCpf = removeCpfFormatting(cpf); // Remove a formatação antes de enviar
+    
+        if (!validateCPF(cleanedCpf)) {
+            showMessage('Por favor, digite um CPF válido com 11 dígitos.', 'error');
             return;
         }
+    
         try {
-            setLoading(true);
-            const data = await verifyCPF(cpf); // Chama a função do serviço
-            setName(data.name);
+            setLoading(true); // Mostra o estado de carregamento
+            const data = await verifyCPF(cleanedCpf); // Certifique-se de enviar o CPF sem formatação
+            if (data && data.name) {
+                setName(data.name); // Exibe o nome encontrado
+            } else {
+                showMessage('CPF não encontrado.', 'error');
+            }
         } catch (error) {
-            alert('CPF não encontrado.');
+            showMessage('Erro ao verificar o CPF.', 'error');
         } finally {
-            setLoading(false);
+            setLoading(false); // Finaliza o estado de carregamento
         }
     };
-
+    
     const handleConfirm = async () => {
+        const cleanedCpf = removeCpfFormatting(cpf); // Remove a formatação antes de enviar
         try {
-            const { response1, response2 } = await confirmUser(cpf); // Chama a função do serviço
-
+            const { response1, response2 } = await confirmUser(cleanedCpf); // Certifique-se de enviar o CPF sem formatação
+    
             // Gera o link para o primeiro PDF
             const url1 = window.URL.createObjectURL(new Blob([response1.data]));
             const link1 = document.createElement('a');
@@ -73,7 +110,7 @@ const CPFForm: React.FC = () => {
             link1.setAttribute('download', 'lista_vermelha-2024.pdf');
             document.body.appendChild(link1);
             link1.click();
-
+    
             // Gera o link para o segundo PDF
             const url2 = window.URL.createObjectURL(new Blob([response2.data]));
             const link2 = document.createElement('a');
@@ -81,25 +118,33 @@ const CPFForm: React.FC = () => {
             link2.setAttribute('download', 'lista_defensivos-2024.pdf');
             document.body.appendChild(link2);
             link2.click();
-
+    
             setDownloadsCompleted(true);
         } catch (error) {
             alert('Erro ao gerar os PDFs.');
+            console.error(error); // Para investigar o erro
         }
     };
+    
 
     const handlePhoneSubmit = async () => {
         if (!validatePhone(phone)) {
-            alert('Por favor, digite um número de telefone válido no formato (XX) XXXXX-XXXX ou (XX) XXXX-XXXX.');
+            showMessage('Por favor, digite um número de telefone válido no formato (XX) XXXXX-XXXX ou (XX) XXXX-XXXX.', 'error');
             return;
         }
+    
+        console.log("CPF:", cpf); // Verifique o CPF
+        console.log("Telefone:", phone); // Verifique o telefone
+    
         try {
-            await savePhone(cpf, phone); // Chama a função do serviço
+            await savePhone(removeCpfFormatting(cpf), phone); // Envia o CPF sem formatação, se necessário
             setPhoneSubmitted(true);
+            showMessage('Telefone enviado com sucesso!', 'success');
         } catch (error) {
-            alert('Erro ao enviar o número de telefone.');
+            showMessage('Erro ao enviar o número de telefone.', 'error');
         }
     };
+    
 
     const handleReset = () => {
         setCpf(''); // Limpa o CPF
@@ -122,14 +167,21 @@ const CPFForm: React.FC = () => {
                                 <div className={styles.formContainer}>
                                     <input
                                         type="text"
-                                        name='cpf'
+                                        name="cpf"
                                         value={cpf}
-                                        onChange={(e) => setCpf(e.target.value)}
+                                        onChange={handleCpfChange}
                                         placeholder="Digite o CPF"
                                         required
                                     />
-                                    <button type="submit" disabled={loading}>Verificar CPF</button>
+                                    <button type="submit" disabled={loading}>
+                                        {loading ? 'Verificando...' : 'Verificar CPF'}
+                                    </button>
                                 </div>
+                                {message && (
+                                    <div className={`${styles.message} ${messageType === 'error' ? styles.error : styles.success}`}>
+                                        {message}
+                                    </div>
+                                )}
                             </form>
                         </div>
                     )}
@@ -145,18 +197,18 @@ const CPFForm: React.FC = () => {
                         <div>
                             <div className={styles.texto}>
                                 <p>Você receberá no seu dispositivo:</p>
-                                <p>A lista de produtos permitidos pelo Fair Trade e</p>
-                                <p>A lista vermelha de produtos proíbidos pelo Fair Trade</p>
-                                <p>Clique no botão abaixo para baixar o PDF.</p>
+                                <p>A Lista dos Agrotóxicos e Materiais Perigosos e a lista Vermelha de Produtos Proíbidos pelo Fair Trade.</p>
+
+                                <p>Clique no botão abaixo para baixar as listas no formato PDF.</p>
                             </div>
-                            <button className={styles.buttonDowloading} onClick={handleConfirm}>Baixar PDF</button>
+                            <button className={styles.buttonDowloading} onClick={handleConfirm}>Baixar Listas</button>
                         </div>
                     )}
                     {downloadsCompleted && (
                         <div>
                             <div className={styles.texto}>
-                                <p>Os arquivos foram baixados com sucesso e já se encontram na pasta de download do seu dispositivo.</p>
-                                <p>Em breve, os arquivos também serão enviados pelo WhatsApp.</p>
+                                <p>Os arquivos foram baixados com sucesso e estão disponíveis na pasta de downloads do seu dispositivo.</p>
+                                <p>Dentro de alguns dias, os arquivos também serão enviados para o seu WhatsApp.</p>
                                 <p>Por favor, digite o número do seu telefone no campo abaixo.</p>
                             </div>
                             <form onSubmit={(e) => { e.preventDefault(); handlePhoneSubmit(); }}>
@@ -171,6 +223,11 @@ const CPFForm: React.FC = () => {
                                     />
                                     <button type="submit">Enviar número</button>
                                 </div>
+                                {message && (
+                                    <div className={`${styles.message} ${messageType === 'error' ? styles.error : styles.success}`}>
+                                        {message}
+                                    </div>
+                                )}
                             </form>
                         </div>
                     )}
@@ -180,7 +237,7 @@ const CPFForm: React.FC = () => {
                     <p>Sua participação foi concluída com sucesso!</p>
                     <p>Obrigado por utilizar nossos serviços!</p>
                     <div>
-                    <Footer />
+                        <Footer />
                     </div>
                 </div>
 

@@ -6,7 +6,7 @@
 }
 
 .logo {
-    max-width: 200px;
+    max-width: 150px;
 }
 
 .formContainer input {
@@ -46,6 +46,24 @@
 }
 
 .texto p{
-    font-size: 20pt;
+    font-size: 16pt;
+}
+
+.message {
+    
+    margin-top: 5px; /* Espaço acima da mensagem */
+    font-size: 14pt; /* Tamanho da fonte */
+}
+
+.success {
+   
+    color: #155724; /* Texto verde escuro */
+  
+}
+
+.error {
+   
+    color: #ac2936; /* Texto vermelho escuro */
+    
 }
 
