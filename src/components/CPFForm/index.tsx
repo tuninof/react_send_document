@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { verifyCPF, confirmUser, savePhone } from '../../services/apiService'; // Importa as funções do serviço
-import ConfirmButtons from '../ConfirmButtons';
+import ConfirmButtons from '../ConfirmButtons'
 import styles from './styles.module.css'
 import logoCoopfam from '../../assets/LogoCoopfamC.png'
-import Footer from '../Footer';
+import Footer from '../Footer'
+import Toogle from '../Toggle'
+
 
 
 const CPFForm: React.FC = () => {
@@ -92,7 +94,7 @@ const CPFForm: React.FC = () => {
                 showMessage('CPF não encontrado.', 'error');
             }
         } catch (error) {
-            showMessage('Erro ao verificar o CPF.', 'error');
+            showMessage('CPF não encontrado.', 'error');
         } finally {
             setLoading(false); // Finaliza o estado de carregamento
         }
@@ -133,11 +135,9 @@ const CPFForm: React.FC = () => {
             return;
         }
     
-        console.log("CPF:", cpf); // Verifique o CPF
-        console.log("Telefone:", phone); // Verifique o telefone
     
         try {
-            await savePhone(removeCpfFormatting(cpf), phone); // Envia o CPF sem formatação, se necessário
+            await savePhone(removeCpfFormatting(cpf), phone); // Envia o CPF sem formatação
             setPhoneSubmitted(true);
             showMessage('Telefone enviado com sucesso!', 'success');
         } catch (error) {
@@ -160,7 +160,11 @@ const CPFForm: React.FC = () => {
                         <div>
                             <div className={styles.texto}>
                                 <img className={styles.logo} src={logoCoopfam} />
-                                <p>Olá, seja bem-vindo a nossa plataforma digital!</p>
+                                <h1 className={styles.title}>Cumprindo as Normas do Fairtrade: Baixe as Listas de Materiais Perigosos</h1>
+                                <p>Olá, seja bem-vindo(a) à nossa plataforma digital!</p>
+                                <p>
+                                Aqui você pode baixar duas listas importantes para seguir as normas da certificação Fairtrade: a Lista Vermelha (materiais proibidos) e a lista de materiais permitidos e restritos. Seguir essas orientações é fundamental para proteger sua saúde, o meio ambiente e manter sua certificação.</p>
+                                <Toogle/>
                                 <p>Por favor, digite seu CPF.</p>
                             </div>
                             <form onSubmit={handleSubmit}>
@@ -188,7 +192,8 @@ const CPFForm: React.FC = () => {
                     {name && !confirmed && (
                         <div>
                             <div className={styles.texto}>
-                                <p>O nome é {name}. Este é você?</p>
+                                <p><span className={styles.spanName}>{name}</span>. </p>
+                                <p>Este é o seu nome?</p>
                             </div>
                             <ConfirmButtons onConfirm={() => setConfirmed(true)} onReset={handleReset} />
                         </div>
@@ -196,10 +201,8 @@ const CPFForm: React.FC = () => {
                     {confirmed && !downloadsCompleted && (
                         <div>
                             <div className={styles.texto}>
-                                <p>Você receberá no seu dispositivo:</p>
-                                <p>A Lista dos Agrotóxicos e Materiais Perigosos e a lista Vermelha de Produtos Proíbidos pelo Fair Trade.</p>
-
-                                <p>Clique no botão abaixo para baixar as listas no formato PDF.</p>
+                                <p>Ao clicar no botão abaixo, você receberá em seu dispositivo:</p>
+                                <p>A Lista de Agrotóxicos e Materiais Perigosos e a Lista Vermelha de Produtos Proibidos pelo Fair Trade.</p>
                             </div>
                             <button className={styles.buttonDowloading} onClick={handleConfirm}>Baixar Listas</button>
                         </div>
@@ -208,8 +211,8 @@ const CPFForm: React.FC = () => {
                         <div>
                             <div className={styles.texto}>
                                 <p>Os arquivos foram baixados com sucesso e estão disponíveis na pasta de downloads do seu dispositivo.</p>
-                                <p>Dentro de alguns dias, os arquivos também serão enviados para o seu WhatsApp.</p>
-                                <p>Por favor, digite o número do seu telefone no campo abaixo.</p>
+                                <p>Em alguns dias, os arquivos também serão enviados para o seu WhatsApp.</p>
+                                <p>Por favor, digite o número do seu telefone no campo abaixo, para que possamos enviá-los.</p>
                             </div>
                             <form onSubmit={(e) => { e.preventDefault(); handlePhoneSubmit(); }}>
                                 <div className={styles.formContainer}>
@@ -235,7 +238,7 @@ const CPFForm: React.FC = () => {
             ) : (
                 <div className={styles.texto}>
                     <p>Sua participação foi concluída com sucesso!</p>
-                    <p>Obrigado por utilizar nossos serviços!</p>
+                    <p>Agradecemos por utilizar nossos serviços!</p>
                     <div>
                         <Footer />
                     </div>
